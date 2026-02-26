@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(chardetect:*)",
+      "Bash(python:*)",
+      "Bash(git -C \"C:\\\\Users\\\\pepsi\\\\Desktop\\\\code\\\\ClawMultiDeploy\" log --oneline -5)"
+    ]
+  }
+}
