@@ -57,12 +57,13 @@ openclaw-deploy/
 │   │   ├── api/                      # API 接口封装
 │   │   └── stores/                   # Pinia 状态管理
 │   └── package.json
-├── instances/                        # 实例数据目录
+├── instances/                        # 实例数据目录（对齐官方 ~/.openclaw）
 │   └── {instance-id}/
-│       ├── data/
-│       │   └── openclaw.json         # OpenClaw 配置文件 (JSON5)
-│       └── logs/
-└── docker-compose.template.yml
+│       └── data/                     # → 容器 /home/node/.openclaw
+│           ├── openclaw.json         # OpenClaw 配置 (JSON5)
+│           └── workspace/            # → /home/node/.openclaw/workspace
+├── docker-compose.template.yml       # 多实例 compose 模板
+└── docker-compose.yml                # 由后端按实例动态生成
 ```
 
 ### 核心数据流
@@ -106,17 +107,35 @@ npm run dev
 npm run build
 ```
 
-### Docker 操作
+### Docker 操作（对齐官方 Gateway 流程）
 
-```powershell
-# 构建 OpenClaw 镜像
-git clone https://github.com/openclaw/openclaw.git
-cd openclaw
+使用**本地从源码构建**的镜像 `openclaw:local`。流程与 [openclaw 仓库](https://github.com/openclaw/openclaw) 的 `docker-setup.sh` / 手动 compose 一致。
+
+```bash
+# 1. 从源码构建镜像（在 OpenClaw 仓库根目录执行）
+cd /path/to/openclaw   # 如 ~/Desktop/code/openclaw
 docker build -t openclaw:local -f Dockerfile .
+
+# 2. 可选：在实例目录下手动跑一次新手引导（或使用管理界面的「初始化」）
+# docker run --rm -v /path/to/ClawMultiDeploy/instances/<id>/data:/home/node/.openclaw openclaw:local node dist/index.js onboard
+
+# 3. 在 ClawMultiDeploy 管理界面启动实例后，控制台在 http://127.0.0.1:<端口>/
+# 获取带 token 的 URL：docker compose run --rm openclaw-cli dashboard --no-open（官方单实例）；多实例时从配置或界面查看 token
 
 # 查看实例容器状态
 docker ps --filter "name=openclaw-"
 ```
+
+**Compose 配置说明（多实例由后端按模板生成，与官方 docker-compose.yml 对齐）**
+
+- **镜像**: `openclaw:local`（本地构建）
+- **端口**: 宿主机 `port` → 容器 **18789**（Gateway），宿主机 `port+1` → 容器 **18790**（Bridge）；首实例 18789/18790，后续 18791/18792…
+- **数据卷**:
+  - `./instances/{id}/data` → `/home/node/.openclaw`（配置 + 工作数据）
+  - `./instances/{id}/data/workspace` → `/home/node/.openclaw/workspace`
+- **启动命令**: `node dist/index.js gateway --bind lan --port 18789`
+- **环境变量**: `HOME=/home/node`, `TERM`, `NODE_ENV`, `TZ`
+- **网络**: `openclaw-net` (bridge)
 
 ## Development Guidelines
 
