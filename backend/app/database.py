@@ -10,6 +10,9 @@ from sqlalchemy.orm import sessionmaker
 
 from app.models import Base
 
+# 项目根目录（backend 的上一级），用于 docker-compose、instances 等路径
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+
 # 数据库文件路径
 DB_PATH = Path(__file__).parent.parent / "data" / "openclaw.db"
 DB_PATH.parent.mkdir(parents=True, exist_ok=True)

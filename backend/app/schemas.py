@@ -12,6 +12,7 @@ class InstanceCreate(BaseModel):
     """创建实例请求"""
     id: str = Field(..., min_length=1, max_length=50, pattern=r"^[a-zA-Z0-9_-]+$")
     name: str = Field(..., min_length=1, max_length=100)
+    password: str = Field(..., min_length=1, max_length=200, description="Gateway 控制台登录密码")
 
 
 class InstanceResponse(BaseModel):
@@ -50,6 +51,11 @@ class SystemStatus(BaseModel):
     base_port: int
     instance_count: int
     running_count: int
+
+
+class DeviceApproveRequest(BaseModel):
+    """设备配对批准请求"""
+    requestId: str = Field(..., min_length=1, description="待批准的设备请求 ID")
 
 
 class ApiResponse(BaseModel):

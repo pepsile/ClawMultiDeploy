@@ -4,9 +4,17 @@ FastAPI 主入口
 """
 
 import asyncio
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+
+# 配置应用日志，便于排查问题
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import init_db
