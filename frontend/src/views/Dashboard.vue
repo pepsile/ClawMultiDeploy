@@ -1,12 +1,12 @@
 <template>
   <div class="dashboard">
     <!-- 统计卡片 -->
-    <el-row :gutter="20">
-      <el-col :span="6">
+    <el-row :gutter="20" class="stat-row">
+      <el-col :xs="24" :sm="12" :md="6">
         <el-card class="stat-card">
           <div class="stat-content">
             <div class="stat-icon blue">
-              <el-icon size="40"><Box /></el-icon>
+              <el-icon size="36"><Box /></el-icon>
             </div>
             <div class="stat-info">
               <div class="stat-value">{{ instanceCount }}</div>
@@ -15,11 +15,11 @@
           </div>
         </el-card>
       </el-col>
-      <el-col :span="6">
+      <el-col :xs="24" :sm="12" :md="6">
         <el-card class="stat-card">
           <div class="stat-content">
             <div class="stat-icon green">
-              <el-icon size="40"><VideoPlay /></el-icon>
+              <el-icon size="36"><VideoPlay /></el-icon>
             </div>
             <div class="stat-info">
               <div class="stat-value">{{ runningCount }}</div>
@@ -28,11 +28,11 @@
           </div>
         </el-card>
       </el-col>
-      <el-col :span="6">
+      <el-col :xs="24" :sm="12" :md="6">
         <el-card class="stat-card">
           <div class="stat-content">
             <div class="stat-icon orange">
-              <el-icon size="40"><VideoPause /></el-icon>
+              <el-icon size="36"><VideoPause /></el-icon>
             </div>
             <div class="stat-info">
               <div class="stat-value">{{ stoppedCount }}</div>
@@ -41,11 +41,11 @@
           </div>
         </el-card>
       </el-col>
-      <el-col :span="6">
+      <el-col :xs="24" :sm="12" :md="6">
         <el-card class="stat-card">
           <div class="stat-content">
             <div class="stat-icon purple">
-              <el-icon size="40"><Folder /></el-icon>
+              <el-icon size="36"><Folder /></el-icon>
             </div>
             <div class="stat-info">
               <div class="stat-value">{{ backups.length }}</div>
@@ -57,7 +57,7 @@
     </el-row>
 
     <!-- 快捷操作 -->
-    <el-card class="quick-actions" style="margin-top: 20px;">
+    <el-card class="quick-actions">
       <template #header>
         <div class="card-header">
           <span>快捷操作</span>
@@ -76,7 +76,7 @@
     </el-card>
 
     <!-- 系统状态 -->
-    <el-card style="margin-top: 20px;">
+    <el-card class="system-card">
       <template #header>
         <div class="card-header">
           <span>系统状态</span>
@@ -127,12 +127,6 @@ const handleBackup = async () => {
 <style scoped>
 .stat-card {
   cursor: pointer;
-  transition: all 0.3s;
-}
-
-.stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .stat-content {
@@ -141,45 +135,45 @@ const handleBackup = async () => {
 }
 
 .stat-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 8px;
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 15px;
+  margin-right: 14px;
 }
 
 .stat-icon.blue {
-  background-color: #ecf5ff;
-  color: #409eff;
+  background: #e3f2fd;
+  color: #1976d2;
 }
 
 .stat-icon.green {
-  background-color: #f0f9eb;
-  color: #67c23a;
+  background: #e8f5e9;
+  color: #388e3c;
 }
 
 .stat-icon.orange {
-  background-color: #fdf6ec;
-  color: #e6a23c;
+  background: #fff3e0;
+  color: #f57c00;
 }
 
 .stat-icon.purple {
-  background-color: #f5f0ff;
-  color: #9254de;
+  background: #f3e5f5;
+  color: #7b1fa2;
 }
 
 .stat-value {
-  font-size: 24px;
-  font-weight: bold;
-  color: #303133;
+  font-size: 22px;
+  font-weight: 600;
+  color: #212121;
 }
 
 .stat-label {
-  font-size: 14px;
-  color: #909399;
-  margin-top: 5px;
+  font-size: 13px;
+  color: #757575;
+  margin-top: 2px;
 }
 
 .card-header {
@@ -188,8 +182,19 @@ const handleBackup = async () => {
   justify-content: space-between;
 }
 
+.stat-row {
+  margin-bottom: 20px;
+}
+.stat-row .el-col {
+  margin-bottom: 20px;
+}
+.quick-actions,
+.system-card {
+  margin-top: 20px;
+}
 .action-buttons {
   display: flex;
-  gap: 15px;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 </style>
