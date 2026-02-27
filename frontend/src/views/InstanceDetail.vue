@@ -2,8 +2,8 @@
   <div class="instance-detail">
     <el-page-header @back="$router.push('/instances')" :title="`实例: ${instance?.name}`" />
 
-    <el-row :gutter="20" style="margin-top: 20px;">
-      <el-col :span="16">
+    <el-row :gutter="20" class="detail-row">
+      <el-col :xs="24" :md="16">
         <!-- 配置编辑器 -->
         <el-card>
           <template #header>
@@ -28,7 +28,7 @@
         </el-card>
       </el-col>
 
-      <el-col :span="8">
+      <el-col :xs="24" :md="8">
         <!-- 实例信息 -->
         <el-card>
           <template #header>
@@ -44,16 +44,17 @@
               </el-tag>
             </el-descriptions-item>
             <el-descriptions-item label="访问地址">
-              <el-link :href="`http://localhost:${instance?.port}`" target="_blank" type="primary">
-                http://localhost:{{ instance?.port }}
-              </el-link>
+              <span class="addr-text">http://{{ hostname }}:{{ instance?.port }}</span>
+              <el-button link type="primary" size="small" @click="copyTokenUrl" style="margin-left: 8px;">
+                复制令牌链接
+              </el-button>
             </el-descriptions-item>
             <el-descriptions-item label="创建时间">
               {{ formatDate(instance?.created_at) }}
             </el-descriptions-item>
           </el-descriptions>
 
-          <div class="action-buttons" style="margin-top: 15px;">
+          <div class="action-buttons">
             <el-button
               v-if="instance?.status !== 'running'"
               type="success"
@@ -70,12 +71,15 @@
             >
               停止
             </el-button>
-            <el-button @click="showLogs = true">查看日志</el-button>
+            <el-button v-if="instance?.status === 'running'" type="info" plain @click="openGateway">
+              控制台
+            </el-button>
+            <el-button @click="showLogsDialog = true">查看日志</el-button>
           </div>
         </el-card>
 
         <!-- 快速帮助 -->
-        <el-card style="margin-top: 20px;">
+        <el-card class="help-card">
           <template #header>
             <span>配置说明</span>
           </template>
@@ -96,16 +100,8 @@
       </el-col>
     </el-row>
 
-    <!-- 日志对话框 -->
-    <el-dialog v-model="showLogs" title="实例日志" width="800px">
-      <div class="logs-container">
-        <pre>{{ logs }}</pre>
-      </div>
-      <template #footer>
-        <el-button @click="showLogs = false">关闭</el-button>
-        <el-button type="primary" @click="fetchLogs">刷新</el-button>
-      </template>
-    </el-dialog>
+    <!-- 实例日志对话框（WebSocket 实时） -->
+    <InstanceLogsDialog v-model="showLogsDialog" :instance-id="instanceId" />
   </div>
 </template>
 
@@ -113,8 +109,10 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useInstanceStore } from '../stores/instances'
+import { getGatewayToken } from '../api/instances'
 import { ElMessage } from 'element-plus'
 import type { Instance } from '../types'
+import InstanceLogsDialog from '../components/InstanceLogsDialog.vue'
 
 const route = useRoute()
 const store = useInstanceStore()
@@ -124,12 +122,15 @@ const instance = computed(() =>
   store.instances.find(i => i.id === instanceId)
 )
 
+const hostname = computed(() =>
+  typeof window !== 'undefined' ? window.location.hostname : 'localhost'
+)
+
 const configContent = ref('')
 const configError = ref('')
 const saving = ref(false)
 const actionLoading = ref(false)
-const showLogs = ref(false)
-const logs = ref('日志加载中...')
+const showLogsDialog = ref(false)
 
 onMounted(() => {
   store.fetchInstances()
@@ -190,9 +191,33 @@ const handleStop = async () => {
   }
 }
 
-const fetchLogs = async () => {
-  // 这里可以实现 WebSocket 实时日志
-  logs.value = '实时日志功能需要 WebSocket 连接'
+async function copyTokenUrl() {
+  if (!instance.value?.port) return
+  try {
+    const res = await getGatewayToken(instanceId)
+    const token = (res.data as any)?.data?.token
+    const base = `http://${hostname.value}:${instance.value.port}`
+    const url = token ? `${base}/?token=${encodeURIComponent(token)}` : base
+    await navigator.clipboard.writeText(url)
+    ElMessage.success(token ? '令牌链接已复制' : '已复制地址，请先配置 gateway.auth.token')
+  } catch {
+    ElMessage.warning('复制失败')
+  }
+}
+
+async function openGateway() {
+  if (!instance.value?.port) return
+  try {
+    const res = await getGatewayToken(instanceId)
+    const token = (res.data as any)?.data?.token
+    const base = `http://${hostname.value}:${instance.value.port}`
+    const url = token ? `${base}/?token=${encodeURIComponent(token)}` : base
+    window.open(url, '_blank', 'noopener,noreferrer')
+    if (!token) ElMessage.warning('未找到令牌，请使用「复制令牌链接」或编辑配置')
+  } catch {
+    window.open(`http://${hostname.value}:${instance.value.port}/`, '_blank')
+    ElMessage.warning('获取令牌失败')
+  }
 }
 
 const getStatusType = (status?: string) => {
@@ -222,14 +247,31 @@ const formatDate = (date?: string) => {
 </script>
 
 <style scoped>
+.detail-row {
+  margin-top: 20px;
+}
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
+.addr-text {
+  font-size: 12px;
+  color: var(--el-text-color-regular);
+  word-break: break-all;
+}
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+.help-card {
+  margin-top: 20px;
+}
 
 .editor-container {
-  border: 1px solid #dcdfe6;
+  border: 1px solid var(--el-border-color);
   border-radius: 4px;
 }
 
@@ -248,23 +290,6 @@ const formatDate = (date?: string) => {
 
 .config-editor:focus {
   outline: none;
-}
-
-.logs-container {
-  background-color: #1e1e1e;
-  color: #d4d4d4;
-  padding: 15px;
-  border-radius: 4px;
-  max-height: 500px;
-  overflow-y: auto;
-}
-
-.logs-container pre {
-  margin: 0;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  font-family: 'Consolas', monospace;
-  font-size: 13px;
 }
 
 .action-buttons {

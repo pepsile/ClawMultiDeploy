@@ -45,8 +45,8 @@ export const useInstanceStore = defineStore('instances', () => {
     }
   }
 
-  async function createInstance(id: string, name: string) {
-    const res = await apiCreateInstance(id, name)
+  async function createInstance(id: string, name: string, password: string) {
+    const res = await apiCreateInstance(id, name, password)
     await fetchInstances()
     return res.data
   }

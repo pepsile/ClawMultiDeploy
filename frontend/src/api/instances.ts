@@ -5,8 +5,8 @@ export const getInstances = () => {
   return request.get<ApiResponse>('/instances')
 }
 
-export const createInstance = (id: string, name: string) => {
-  return request.post<ApiResponse>('/instances', { id, name })
+export const createInstance = (id: string, name: string, password: string) => {
+  return request.post<ApiResponse>('/instances', { id, name, password })
 }
 
 export const deleteInstance = (id: string, keepData: boolean = false) => {
@@ -27,6 +27,22 @@ export const initInstance = (id: string) => {
 
 export const getInstanceConfig = (id: string) => {
   return request.get<ApiResponse>(`/instances/${id}/config`)
+}
+
+export const getGatewayToken = (id: string) => {
+  return request.get<ApiResponse>(`/instances/${id}/gateway-token`)
+}
+
+export const regenerateGatewayToken = (id: string) => {
+  return request.post<ApiResponse>(`/instances/${id}/regenerate-gateway-token`)
+}
+
+export const getInstanceDevices = (id: string) => {
+  return request.get<ApiResponse>(`/instances/${id}/devices`)
+}
+
+export const approveDevice = (id: string, requestId: string) => {
+  return request.post<ApiResponse>(`/instances/${id}/devices/approve`, { requestId })
 }
 
 export const updateInstanceConfig = (id: string, content: string) => {

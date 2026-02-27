@@ -12,6 +12,11 @@
       </template>
 
       <el-table :data="backups" v-loading="loading" style="width: 100%">
+        <template #empty>
+          <el-empty description="暂无备份，点击下方按钮创建" class="table-empty">
+            <el-button type="primary" @click="handleCreateBackup">创建备份</el-button>
+          </el-empty>
+        </template>
         <el-table-column type="index" label="#" width="60" />
         <el-table-column prop="filename" label="文件名" min-width="200">
           <template #default="{ row }">
@@ -48,8 +53,6 @@
           </template>
         </el-table-column>
       </el-table>
-
-      <el-empty v-if="backups.length === 0" description="暂无备份" />
     </el-card>
 
     <!-- 创建备份进度对话框 -->
@@ -194,5 +197,8 @@ const handleDelete = async (row: Backup) => {
 
 .progress-content {
   padding: 20px;
+}
+.table-empty {
+  padding: 32px 0;
 }
 </style>
